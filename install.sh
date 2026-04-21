@@ -8,12 +8,17 @@ echo "==> Installing dependencies..."
 
 if command -v apt-get &>/dev/null; then
   sudo apt-get update -qq
-  sudo apt-get install -y git curl unzip ripgrep fd-find nodejs npm
+  sudo apt-get install -y git curl unzip ripgrep fd-find
+  # nodejs from nodesource bundles npm — don't install apt's npm (conflicts)
+  if ! command -v node &>/dev/null; then
+    curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+  fi
   # fd-find installs as 'fdfind' on ubuntu, symlink it
   [ ! -f /usr/local/bin/fd ] && sudo ln -sf "$(which fdfind)" /usr/local/bin/fd 2>/dev/null || true
 
 elif command -v dnf &>/dev/null; then
-  sudo dnf install -y git curl unzip ripgrep fd-find nodejs npm
+  sudo dnf install -y git curl unzip ripgrep fd-find nodejs
 
 elif command -v pacman &>/dev/null; then
   sudo pacman -Sy --noconfirm git curl unzip ripgrep fd nodejs npm
