@@ -31,12 +31,22 @@ else
 fi
 
 echo "==> Installing Ghostty..."
-if command -v flatpak &>/dev/null; then
-  flatpak install -y flathub com.mitchellh.ghostty 2>/dev/null || true
-elif command -v pacman &>/dev/null; then
+if command -v pacman &>/dev/null; then
   sudo pacman -Sy --noconfirm ghostty 2>/dev/null || yay -S --noconfirm ghostty 2>/dev/null || true
 else
-  echo "    Install Ghostty manually: https://ghostty.org/download"
+  # ensure flatpak + flathub, then install ghostty
+  if ! command -v flatpak &>/dev/null; then
+    if command -v apt-get &>/dev/null; then
+      sudo apt-get install -y flatpak || true
+      flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo || true
+    fi
+  fi
+  if command -v flatpak &>/dev/null; then
+    flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo || true
+    flatpak install -y flathub com.mitchellh.ghostty || true
+  else
+    echo "    Install Ghostty manually: https://ghostty.org/download"
+  fi
 fi
 
 echo "==> Installing Neovim (latest)..."
