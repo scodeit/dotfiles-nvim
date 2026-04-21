@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -eo pipefail
 
 REPO="https://github.com/scodeit/dotfiles-nvim.git"
 NVIM_CONFIG="$HOME/.config/nvim"
@@ -8,14 +8,17 @@ echo "==> Installing dependencies..."
 
 if command -v apt-get &>/dev/null; then
   sudo apt-get update -qq
-  sudo apt-get install -y git curl unzip ripgrep fd-find
-  # nodejs from nodesource bundles npm — don't install apt's npm (conflicts)
+  # install each package separately so one failure doesn't block the rest
+  for pkg in git curl unzip ripgrep fd-find; do
+    sudo apt-get install -y "$pkg" || echo "  WARNING: could not install $pkg"
+  done
+  # nodejs from nodesource bundles npm — skip apt npm (conflicts with nodesource node)
   if ! command -v node &>/dev/null; then
     curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
     sudo apt-get install -y nodejs
   fi
   # fd-find installs as 'fdfind' on ubuntu, symlink it
-  [ ! -f /usr/local/bin/fd ] && sudo ln -sf "$(which fdfind)" /usr/local/bin/fd 2>/dev/null || true
+  command -v fdfind &>/dev/null && sudo ln -sf "$(which fdfind)" /usr/local/bin/fd 2>/dev/null || true
 
 elif command -v dnf &>/dev/null; then
   sudo dnf install -y git curl unzip ripgrep fd-find nodejs
