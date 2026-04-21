@@ -22,6 +22,15 @@ else
   echo "Unsupported package manager. Install manually: git curl ripgrep fd nodejs"
 fi
 
+echo "==> Installing Ghostty..."
+if command -v flatpak &>/dev/null; then
+  flatpak install -y flathub com.mitchellh.ghostty 2>/dev/null || true
+elif command -v pacman &>/dev/null; then
+  sudo pacman -Sy --noconfirm ghostty 2>/dev/null || yay -S --noconfirm ghostty 2>/dev/null || true
+else
+  echo "    Install Ghostty manually: https://ghostty.org/download"
+fi
+
 echo "==> Installing Neovim (latest)..."
 NVIM_URL="https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz"
 curl -sL "$NVIM_URL" | sudo tar -xz -C /usr/local --strip-components=1
